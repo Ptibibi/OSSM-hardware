@@ -78,21 +78,25 @@ void OSSM::drawPlayControlsTask(void *pvParameters) {
             case PlayControls::STROKE:
                 next.stroke = encoder;
                 shouldUpdateDisplay = shouldUpdateDisplay ||
-                                      next.stroke - ossm->setting.stroke >= 1;
+                                      next.stroke - ossm->setting.stroke != 0;
                 ossm->setting.stroke = next.stroke;
+                if (ossm->setting.depth < ossm->setting.stroke)
+                    ossm->setting.stroke = ossm->setting.depth;
                 break;
             case PlayControls::SENSATION:
                 next.sensation = encoder;
                 shouldUpdateDisplay =
                     shouldUpdateDisplay ||
-                    next.sensation - ossm->setting.sensation >= 1;
+                    next.sensation - ossm->setting.sensation != 0;
                 ossm->setting.sensation = next.sensation;
                 break;
             case PlayControls::DEPTH:
                 next.depth = encoder;
                 shouldUpdateDisplay = shouldUpdateDisplay ||
-                                      next.depth - ossm->setting.depth >= 1;
+                                      next.depth - ossm->setting.depth != 0;
                 ossm->setting.depth = next.depth;
+                if (ossm->setting.depth < ossm->setting.stroke)
+                    ossm->setting.stroke = ossm->setting.depth;
                 break;
         }
 
