@@ -105,6 +105,33 @@ namespace Config {
 
     }
 
+
+    /**
+        Remote Config
+*/
+    namespace Remote {
+
+        // Speed ramp of speed for SinglePenetration and StrokeEngine mode
+        // Time cycle is approximately 100-200ms in fact system load
+        constexpr float speedUpPercentPerCycle = 5.0f;
+        constexpr float speedDownPercentPerCycle = 100.0f;
+
+        // Speed ramp of stroke for StrokeEngine mode
+        // Time cycle is approximately 100-200ms in fact system load
+        constexpr float strokeUpPercentPerCycle = 5.0f;
+        constexpr float strokeDownPercentPerCycle = 10.0f;
+
+        // Speed ramp of depth for StrokeEngine mode
+        // Time cycle is approximately 100-200ms in fact system load
+        constexpr float depthUpPercentPerCycle = 5.0f;
+        constexpr float depthDownPercentPerCycle = 10.0f;
+
+        // Speed ramp of sensation for StrokeEngine mode
+        // Time cycle is approximately 100-200ms in fact system load
+        constexpr float sensationUpPercentPerCycle = 5.0f;
+        constexpr float sensationDownPercentPerCycle = 10.0f;
+    }
+
 }
 
 // Alias for "_mm" operator
