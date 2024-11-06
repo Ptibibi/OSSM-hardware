@@ -149,12 +149,6 @@ class OSSM {
                 return [option](OSSM &o) { return o.menuSettingsOption == option; };
             };
 
-            auto isPreflightSafe = [](OSSM &o) {
-                return getAnalogAveragePercent(
-                           {Pins::Remote::speedPotPin, 50}) <
-                       Config::Advanced::commandDeadZonePercentage;
-            };
-
             auto isFirstHomed = [](OSSM &o) {
                 static bool firstHomed = true;
                 if (firstHomed) {
@@ -197,13 +191,11 @@ class OSSM {
                 "menuSettings.idle"_s + longPress = "menu"_s,
 
                 "simplePenetration"_s [isNotHomed] = "homing"_s,
-                "simplePenetration"_s [isPreflightSafe] / (resetSettings, drawPlayControls, startSimplePenetration) = "simplePenetration.idle"_s,
                 "simplePenetration"_s / drawPreflight = "simplePenetration.preflight"_s,
                 "simplePenetration.preflight"_s + done / (resetSettings, drawPlayControls, startSimplePenetration) = "simplePenetration.idle"_s,
                 "simplePenetration.idle"_s + longPress / (emergencyStop, setNotHomed) = "menu"_s,
 
                 "strokeEngine"_s [isNotHomed] = "homing"_s,
-                "strokeEngine"_s [isPreflightSafe] / (resetSettings, drawPlayControls, startStrokeEngine) = "strokeEngine.idle"_s,
                 "strokeEngine"_s / drawPreflight = "strokeEngine.preflight"_s,
                 "strokeEngine.preflight"_s + done / (resetSettings, drawPlayControls, startStrokeEngine) = "strokeEngine.idle"_s,
                 "strokeEngine.idle"_s + buttonPress / incrementControl = "strokeEngine.idle"_s,
