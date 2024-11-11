@@ -311,6 +311,9 @@ class OSSM {
     static void drawHelloTask(void *pvParameters);
 
     static void drawMenuTask(void *pvParameters);
+    static void drawMenuOnDisplay(OSSM *ossm, String *menuStrings,
+                                  int lastIdx, int idx, int nextIdx,
+                                  int numberIdx);
 
     static void drawPlayControlsTask(void *pvParameters);
     static float applyLerp(float current, float target, float increaseValue, float decreaseValue);
