@@ -19,7 +19,6 @@ static const LanguageStruct enUs = {
     .NoInternalLoop = "No display handler implemented.",
     .Restart = "Restart",
     .Settings = "Settings",
-    .SimplePenetration = "Simple Penetration",
     .Skip = "Click to exit",
     .Speed = "Speed",
     .SpeedWarning = "Decrease the speed to begin playing.",
