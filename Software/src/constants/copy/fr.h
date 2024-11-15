@@ -39,7 +39,7 @@ static const LanguageStruct fr = {
     .WiFiSetupLine2 = "'Ossm Setup'",
     .YouShouldNotBeHere = "Vous ne devriez pas être ici.",
     .StrokeEngineDescriptions = {
-        "Accélération, roulement, décélération également répartis ; sans sensation.",
+        "Accélération, roulement, décélération également répartis ; sur toute la longueur.",
         "La vitesse change avec la sensation ; équilibre les coups rapides.",
         "La sensation varie l'accélération ; de robotique à progressive.",
         "Alternance de coups pleins et à demi-profondeur ; la sensation affecte la vitesse.",
@@ -48,7 +48,7 @@ static const LanguageStruct fr = {
         "Modifie la longueur, maintient la vitesse ; la sensation influe sur la direction.",
     },
     .StrokeEngineNames = {
-        "Simple Stroke",
+        "Simple Penetration",
         "Teasing Pounding",
         "Robo Stroke",
         "Half'n'Half",

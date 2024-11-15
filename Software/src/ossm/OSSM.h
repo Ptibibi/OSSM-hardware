@@ -72,7 +72,7 @@ class OSSM {
                 o.setting.stroke = Config::ResetSettings::stroke;
                 o.setting.depth = Config::ResetSettings::depth;
                 o.setting.sensation = Config::ResetSettings::sensation;
-                o.playControl = PlayControls::STROKE;
+                o.playControl = PlayControls::DEPTH;
 
                 // Prepare the encoder
                 o.encoder.setBoundaries(0, 100, false);
@@ -86,19 +86,23 @@ class OSSM {
             };
 
             auto incrementControl = [](OSSM &o) {
-                o.playControl =
-                    static_cast<PlayControls>((o.playControl + 1) % 3);
-
-                switch (o.playControl) {
-                    case PlayControls::STROKE:
-                        o.encoder.setEncoderValue(o.setting.stroke);
-                        break;
-                    case PlayControls::DEPTH:
-                        o.encoder.setEncoderValue(o.setting.depth);
-                        break;
-                    case PlayControls::SENSATION:
-                        o.encoder.setEncoderValue(o.setting.sensation);
-                        break;
+                if (o.setting.pattern == StrokePatterns::SimplePenetration) {
+                    o.playControl = static_cast<PlayControls>(o.playControl);
+                    o.encoder.setEncoderValue(o.setting.depth);
+                }
+                else {
+                    o.playControl = static_cast<PlayControls>((o.playControl + 1) % 3);
+                    switch (o.playControl) {
+                        case PlayControls::DEPTH:
+                            o.encoder.setEncoderValue(o.setting.depth);
+                            break;
+                        case PlayControls::STROKE:
+                            o.encoder.setEncoderValue(o.setting.stroke);
+                            break;
+                        case PlayControls::SENSATION:
+                            o.encoder.setEncoderValue(o.setting.sensation);
+                            break;
+                    }
                 }
             };
 
@@ -265,7 +269,7 @@ class OSSM {
                                .stroke = 0,
                                .sensation = 50,
                                .depth = 50,
-                               .pattern = StrokePatterns::SimpleStroke};
+                               .pattern = StrokePatterns::SimplePenetration};
 
     unsigned long sessionStartTime = 0;
     int sessionStrokeCount = 0;

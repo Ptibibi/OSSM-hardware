@@ -180,14 +180,14 @@ class Pattern {
 
 /**************************************************************************/
 /*!
-  @brief  Simple Stroke Pattern. It creates a trapezoidal stroke profile
-  with 1/3 acceleration, 1/3 coasting, 1/3 deceleration. Sensation has
-  no effect.
+  @brief  Simple Penetration Pattern. It creates a trapezoidal stroke profile
+  on all depth. Stroke and Sensation has no effect.
+  Profile is 1/3 acceleration, 1/3 coasting, 1/3 deceleration for all depth.
 */
 /**************************************************************************/
-class SimpleStroke : public Pattern {
+class SimplePenetration : public Pattern {
   public:
-    SimpleStroke(const char *str) : Pattern(str) {}
+    SimplePenetration(const char *str) : Pattern(str) {}
 
     motionParameter nextTarget(unsigned int index) {
         if (_speed == 0) {
@@ -206,13 +206,11 @@ class SimpleStroke : public Pattern {
 
         // odd stroke is moving out
         if (index % 2) {
-            // stroke to move out
-            _nextMove.stroke = constrain(_depth - _stroke, 0, _depth);
+            _nextMove.stroke = _depth;
 
         // even stroke is moving in
         } else {
-            // stroke to move in
-            _nextMove.stroke = _depth;
+            _nextMove.stroke = 0;
         }
 
         _index = index;

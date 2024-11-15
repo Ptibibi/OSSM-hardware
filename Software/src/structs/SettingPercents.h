@@ -2,7 +2,7 @@
 #define SOFTWARE_SETTINGPERCENTS_H
 
 enum class StrokePatterns {
-    SimpleStroke,
+    SimplePenetration,
     TeasingPounding,
     RoboStroke,
     HalfnHalf,
