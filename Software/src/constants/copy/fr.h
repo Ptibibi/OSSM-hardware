@@ -26,7 +26,7 @@ static const LanguageStruct fr = {
     .SpeedWarning = "Réduisez la vitesse pour commencer à jouer.",
     .StateNotImplemented = "État: %u non implémenté.",
     .Stroke = "Coup",
-    .StrokeEngine = "Stroke Engine",
+    .StrokeEngine = "Play OSSM",
     .StrokeTooShort =
         "Course trop courte. Veuillez vérifier votre courroie d'entraînement.",
     .Update = "Mettre à jour",
