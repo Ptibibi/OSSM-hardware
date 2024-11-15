@@ -21,7 +21,6 @@ static const LanguageStruct fr = {
     .NoInternalLoop = "Aucun gestionnaire d'affichage implémenté.",
     .Restart = "Redémarrage",
     .Settings = "Paramètres",
-    .SimplePenetration = "Pénétration simple",
     .Skip = "Quitter ->",
     .Speed = "Vitesse",
     .SpeedWarning = "Réduisez la vitesse pour commencer à jouer.",
