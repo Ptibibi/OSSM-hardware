@@ -70,9 +70,9 @@ void OSSM::startStrokeEngineTask(void *pvParameters) {
             ESP_LOGD("UTILS", "change pattern: %d", ossm->setting.pattern);
 
             switch (ossm->setting.pattern) {
-                case StrokePatterns::SimpleStroke:
-                    Stroker.setPattern(new SimpleStroke("Simple Stroke"),
-                                       false);
+                case StrokePatterns::SimplePenetration:
+                    ossm->playControl = PlayControls::DEPTH; // Init PlayControl because SimplePenetration pattern use only depth control
+                    Stroker.setPattern(new SimplePenetration("Simple Penetration"), false);
                     break;
                 case StrokePatterns::TeasingPounding:
                     Stroker.setPattern(new TeasingPounding("Teasing Pounding"),
