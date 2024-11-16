@@ -6,7 +6,6 @@
 #include "constants/UserConfig.h"
 
 enum Menu {
-    SimplePenetration,
     StrokeEngine,
     UpdateOSSM,
     WiFiSetup,
@@ -16,7 +15,6 @@ enum Menu {
 };
 
 static String menuStrings[Menu::NUM_OPTIONS] = {
-    UserConfig::language.SimplePenetration,
     UserConfig::language.StrokeEngine,
     UserConfig::language.Update,
     UserConfig::language.WiFiSetup,

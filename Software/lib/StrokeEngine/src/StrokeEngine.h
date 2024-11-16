@@ -399,7 +399,7 @@ class StrokeEngine {
     int _maxStep;
     int _maxStepPerSecond;
     int _maxStepAcceleration;
-    Pattern *pattern = new SimpleStroke("Simple Stroke");
+    Pattern *pattern = new SimplePenetration("Simple Penetration");
     bool _isHomed = false;
     int _index = 0;
     int _depth;

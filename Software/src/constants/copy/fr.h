@@ -21,13 +21,12 @@ static const LanguageStruct fr = {
     .NoInternalLoop = "Aucun gestionnaire d'affichage implémenté.",
     .Restart = "Redémarrage",
     .Settings = "Paramètres",
-    .SimplePenetration = "Pénétration simple",
     .Skip = "Quitter ->",
     .Speed = "Vitesse",
     .SpeedWarning = "Réduisez la vitesse pour commencer à jouer.",
     .StateNotImplemented = "État: %u non implémenté.",
     .Stroke = "Coup",
-    .StrokeEngine = "Stroke Engine",
+    .StrokeEngine = "Play OSSM",
     .StrokeTooShort =
         "Course trop courte. Veuillez vérifier votre courroie d'entraînement.",
     .Update = "Mettre à jour",
@@ -39,7 +38,7 @@ static const LanguageStruct fr = {
     .WiFiSetupLine2 = "'Ossm Setup'",
     .YouShouldNotBeHere = "Vous ne devriez pas être ici.",
     .StrokeEngineDescriptions = {
-        "Accélération, roulement, décélération également répartis ; sans sensation.",
+        "Accélération, roulement, décélération également répartis ; sur toute la longueur.",
         "La vitesse change avec la sensation ; équilibre les coups rapides.",
         "La sensation varie l'accélération ; de robotique à progressive.",
         "Alternance de coups pleins et à demi-profondeur ; la sensation affecte la vitesse.",
@@ -48,7 +47,7 @@ static const LanguageStruct fr = {
         "Modifie la longueur, maintient la vitesse ; la sensation influe sur la direction.",
     },
     .StrokeEngineNames = {
-        "Simple Stroke",
+        "Simple Penetration",
         "Teasing Pounding",
         "Robo Stroke",
         "Half'n'Half",

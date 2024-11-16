@@ -19,7 +19,6 @@ static TaskHandle_t wmTaskH = nullptr;
 static TaskHandle_t drawPreflightTaskH = nullptr;
 
 static TaskHandle_t runHomingTaskH = nullptr;
-static TaskHandle_t runSimplePenetrationTaskH = nullptr;
 static TaskHandle_t runStrokeEngineTaskH = nullptr;
 
 static const int stepperCore = 1;

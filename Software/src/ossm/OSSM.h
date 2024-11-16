@@ -71,7 +71,7 @@ class OSSM {
                 o.setting.stroke = 0;
                 o.setting.depth = 50;
                 o.setting.sensation = 50;
-                o.playControl = PlayControls::STROKE;
+                o.playControl = PlayControls::DEPTH;
 
                 // Prepare the encoder
                 o.encoder.setBoundaries(0, 100, false);
@@ -85,15 +85,17 @@ class OSSM {
             };
 
             auto incrementControl = [](OSSM &o) {
-                o.playControl =
-                    static_cast<PlayControls>((o.playControl + 1) % 3);
+                if (o.setting.pattern == StrokePatterns::SimplePenetration)
+                    o.playControl = PlayControls::DEPTH;
+                else
+                    o.playControl = static_cast<PlayControls>((o.playControl + 1) % 3);
 
                 switch (o.playControl) {
-                    case PlayControls::STROKE:
-                        o.encoder.setEncoderValue(o.setting.stroke);
-                        break;
                     case PlayControls::DEPTH:
                         o.encoder.setEncoderValue(o.setting.depth);
+                        break;
+                    case PlayControls::STROKE:
+                        o.encoder.setEncoderValue(o.setting.stroke);
                         break;
                     case PlayControls::SENSATION:
                         o.encoder.setEncoderValue(o.setting.sensation);
@@ -101,9 +103,6 @@ class OSSM {
                 }
             };
 
-            auto startSimplePenetration = [](OSSM &o) {
-                o.startSimplePenetration();
-            };
             auto startStrokeEngine = [](OSSM &o) { o.startStrokeEngine(); };
             auto emergencyStop = [](OSSM &o) {
                 o.stepper->forceStop();
@@ -176,22 +175,14 @@ class OSSM {
                 "homing.backward"_s + error = "error"_s,
                 "homing.backward"_s + done[(isStrokeTooShort)] = "error"_s,
                 "homing.backward"_s + done[isFirstHomed] / setHomed = "menu"_s,
-                "homing.backward"_s + done[(isOption(Menu::SimplePenetration))] / setHomed = "simplePenetration"_s,
                 "homing.backward"_s + done[(isOption(Menu::StrokeEngine))] / setHomed = "strokeEngine"_s,
 
                 "menu"_s / (drawMenu, startWifi) = "menu.idle"_s,
-                "menu.idle"_s + buttonPress[(isOption(Menu::SimplePenetration))] = "simplePenetration"_s,
                 "menu.idle"_s + buttonPress[(isOption(Menu::StrokeEngine))] = "strokeEngine"_s,
                 "menu.idle"_s + buttonPress[(isOption(Menu::UpdateOSSM))] = "update"_s,
                 "menu.idle"_s + buttonPress[(isOption(Menu::WiFiSetup))] = "wifi"_s,
                 "menu.idle"_s + buttonPress[isOption(Menu::Help)] = "help"_s,
                 "menu.idle"_s + buttonPress[(isOption(Menu::Restart))] = "restart"_s,
-
-                "simplePenetration"_s [isNotHomed] = "homing"_s,
-                "simplePenetration"_s [isPreflightSafe] / (resetSettings, drawPlayControls, startSimplePenetration) = "simplePenetration.idle"_s,
-                "simplePenetration"_s / drawPreflight = "simplePenetration.preflight"_s,
-                "simplePenetration.preflight"_s + done / (resetSettings, drawPlayControls, startSimplePenetration) = "simplePenetration.idle"_s,
-                "simplePenetration.idle"_s + longPress / (emergencyStop, setNotHomed) = "menu"_s,
 
                 "strokeEngine"_s [isNotHomed] = "homing"_s,
                 "strokeEngine"_s [isPreflightSafe] / (resetSettings, drawPlayControls, startStrokeEngine) = "strokeEngine.idle"_s,
@@ -261,7 +252,7 @@ class OSSM {
                                .stroke = 0,
                                .sensation = 50,
                                .depth = 50,
-                               .pattern = StrokePatterns::SimpleStroke};
+                               .pattern = StrokePatterns::SimplePenetration};
 
     unsigned long sessionStartTime = 0;
     int sessionStrokeCount = 0;
@@ -279,8 +270,6 @@ class OSSM {
     void clearHoming();
 
     void startHoming();
-
-    void startSimplePenetration();
 
     bool isStrokeTooShort();
 
@@ -322,8 +311,6 @@ class OSSM {
 
     void drawPreflight();
     static void drawPreflightTask(void *pvParameters);
-
-    static void startSimplePenetrationTask(void *pvParameters);
 
     static void startStrokeEngineTask(void *pvParameters);
 

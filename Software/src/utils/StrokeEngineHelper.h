@@ -13,7 +13,7 @@
 ##################################################################################################*/
 
 // enum of stroke engine states
-enum PlayControls { STROKE, DEPTH, SENSATION };
+enum PlayControls { DEPTH, STROKE,SENSATION };
 
 static motorProperties servoMotor{
     .maxSpeed =
