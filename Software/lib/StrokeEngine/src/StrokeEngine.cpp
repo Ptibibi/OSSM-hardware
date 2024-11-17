@@ -49,11 +49,8 @@ void StrokeEngine::setSpeed(float speed, bool applyNow = false) {
     // Update pattern with new speed, will be used with the next stroke or on
     // update request
     if (xSemaphoreTake(_patternMutex, portMAX_DELAY) == pdTRUE) {
-        // Convert FPM into seconds to complete a full stroke
-        // Constrain stroke time between 10ms and 120 seconds
-        _timeOfStroke = constrain(60.0 / speed, 0.01, 120.0);
-
-        pattern->setTimeOfStroke(_timeOfStroke);
+        _speed = speed;
+        _timeOfStroke = pattern->setTimeOfStroke(speed, getDepth(), getStroke(), getSensation());
 
 #ifdef DEBUG_TALKATIVE
         Serial.println("setTimeOfStroke: " + String(_timeOfStroke, 2));
@@ -75,8 +72,7 @@ void StrokeEngine::setSpeed(float speed, bool applyNow = false) {
 }
 
 float StrokeEngine::getSpeed() {
-    // Convert speed into FPMs
-    return 60.0 / _timeOfStroke;
+    return _speed;
 }
 
 void StrokeEngine::setDepth(float depth, bool applyNow = false) {
@@ -202,10 +198,10 @@ bool StrokeEngine::setPattern(Pattern *NextPattern,
     if (xSemaphoreTake(_patternMutex, portMAX_DELAY) == pdTRUE) {
         pattern->setSpeedLimit(_maxStepPerSecond, _maxStepAcceleration,
                               _motor->stepsPerMillimeter);
-        pattern->setTimeOfStroke(_timeOfStroke);
         pattern->setStroke(_stroke);
         pattern->setDepth(_depth);
         pattern->setSensation(_sensation);
+        pattern->setTimeOfStroke(getSpeed(), getDepth(), getStroke(), getSensation());
 
         // When running a pattern and immediate update requested:
         if ((_state == PATTERN) && (applyNow == true)) {
@@ -255,10 +251,10 @@ bool StrokeEngine::startPattern() {
         if (xSemaphoreTake(_patternMutex, portMAX_DELAY) == pdTRUE) {
             pattern->setSpeedLimit(_maxStepPerSecond, _maxStepAcceleration,
                                   _motor->stepsPerMillimeter);
-            pattern->setTimeOfStroke(_timeOfStroke);
             pattern->setStroke(_stroke);
             pattern->setDepth(_depth);
             pattern->setSensation(_sensation);
+            pattern->setTimeOfStroke(getSpeed(), getDepth(), getStroke(), getSensation());
             xSemaphoreGive(_patternMutex);
         }
 

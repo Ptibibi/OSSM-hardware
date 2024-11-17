@@ -29,17 +29,6 @@ void OSSM::startStrokeEngineTask(void *pvParameters) {
     };
 
     while (isInCorrectState(ossm)) {
-        if (isChangeSignificant(lastSetting.speed, ossm->setting.speed)) {
-            if (ossm->setting.speed == 0) {
-                Stroker.stopMotion();
-            } else if (Stroker.getState() == READY) {
-                Stroker.startPattern();
-            }
-
-            Stroker.setSpeed(ossm->setting.speed * 3, true);
-            lastSetting.speed = ossm->setting.speed;
-        }
-
         if (lastSetting.stroke != ossm->setting.stroke) {
             float newStroke =
                 0.01f * ossm->setting.stroke * abs(measuredStrokeMm);
@@ -64,6 +53,21 @@ void OSSM::startStrokeEngineTask(void *pvParameters) {
                      ossm->setting.sensation, newSensation);
             Stroker.setSensation(newSensation, false);
             lastSetting.sensation = ossm->setting.sensation;
+        }
+
+        if (isChangeSignificant(lastSetting.speed, ossm->setting.speed)) {
+            lastSetting.speed = ossm->setting.speed;
+
+            if (ossm->setting.speed == 0) {
+                Stroker.stopMotion();
+            } else if (Stroker.getState() == READY) {
+                Stroker.startPattern();
+            }
+
+            float speedMmPerSecond = (Config::Driver::maxSpeedMmPerSecond * ossm->setting.speed) / 100.0F;
+            ESP_LOGD("UTILS", "speedMmPerSecond: %fmm/s", speedMmPerSecond);
+
+            Stroker.setSpeed(speedMmPerSecond, true);
         }
 
         if (lastSetting.pattern != ossm->setting.pattern) {

@@ -65,7 +65,11 @@ class Pattern {
     /*!
       @param speed time of a full stroke in [sec]
     */
-    virtual void setTimeOfStroke(float speed) { _timeOfStroke = speed; }
+    virtual float setTimeOfStroke(float speedMmPerSecond, float depthMm, float strokeMm, float sensationPercent) {
+        // Speed to time
+        _timeOfStroke = ((min(abs(depthMm), abs(strokeMm)) * 2.0F) / speedMmPerSecond);
+        return _timeOfStroke;
+    }
 
     //! Set the maximum stroke a pattern may have
     /*!
@@ -168,9 +172,11 @@ class SimpleStroke : public Pattern {
   public:
     SimpleStroke(const char *str) : Pattern(str) {}
 
-    void setTimeOfStroke(float speed = 0) {
+    float setTimeOfStroke(float speedMmPerSecond = 0, float depthMm = 0, float strokeMm = 0, float sensationPercent = 0) {
         // In & Out have same time, so we need to divide by 2
-        _timeOfStroke = 0.5 * speed;
+        // time of stroke
+        _timeOfStroke = 0.5 * ((min(abs(depthMm), abs(strokeMm)) * 2.0F) / speedMmPerSecond);
+        return _timeOfStroke;
     }
 
     motionParameter nextTarget(unsigned int index) {
@@ -210,9 +216,10 @@ class TeasingPounding : public Pattern {
         _sensation = sensation;
         _updateStrokeTiming();
     }
-    void setTimeOfStroke(float speed = 0) {
-        _timeOfStroke = speed;
+    float setTimeOfStroke(float speedMmPerSecond = 0, float depthMm = 0, float strokeMm = 0, float sensationPercent = 0) {
+        _timeOfStroke = ((min(abs(depthMm), abs(strokeMm)) * 2.0F) / speedMmPerSecond);
         _updateStrokeTiming();
+        return _timeOfStroke;
     }
     motionParameter nextTarget(unsigned int index) {
         // odd stroke is moving out
@@ -275,9 +282,10 @@ class RoboStroke : public Pattern {
   public:
     RoboStroke(const char *str) : Pattern(str) {}
 
-    void setTimeOfStroke(float speed = 0) {
+    float setTimeOfStroke(float speedMmPerSecond = 0, float depthMm = 0, float strokeMm = 0, float sensationPercent = 0) {
         // In & Out have same time, so we need to divide by 2
-        _timeOfStroke = 0.5 * speed;
+        _timeOfStroke = 0.5 * ((min(abs(depthMm), abs(strokeMm)) * 2.0F) / speedMmPerSecond);
+        return _timeOfStroke;
     }
 
     void setSensation(float sensation = 0) {
@@ -336,9 +344,11 @@ class HalfnHalf : public Pattern {
         _sensation = sensation;
         _updateStrokeTiming();
     }
-    void setTimeOfStroke(float speed = 0) {
-        _timeOfStroke = speed;
+    float setTimeOfStroke(float speedMmPerSecond = 0, float depthMm = 0, float strokeMm = 0, float sensationPercent = 0) {
+        // One and half movement
+        _timeOfStroke = 1.5 * ((min(abs(depthMm), abs(strokeMm)) * 2.0F) / speedMmPerSecond);
         _updateStrokeTiming();
+        return _timeOfStroke;
     }
     motionParameter nextTarget(unsigned int index) {
         // check if this is the very first
@@ -358,7 +368,7 @@ class HalfnHalf : public Pattern {
         // odd stroke is moving out
         if (index % 2) {
             // maximum speed of the trapezoidal motion
-            _nextMove.speed = int(1.5 * stroke / _timeOfOutStroke);
+            _nextMove.speed = int(stroke / _timeOfOutStroke);
 
             // acceleration to meet the profile
             _nextMove.acceleration =
@@ -369,7 +379,7 @@ class HalfnHalf : public Pattern {
             // even stroke is moving in
         } else {
             // maximum speed of the trapezoidal motion
-            _nextMove.speed = int(1.5 * stroke / _timeOfInStroke);
+            _nextMove.speed = int(stroke / _timeOfInStroke);
 
             // acceleration to meet the profile
             _nextMove.acceleration =
@@ -417,9 +427,10 @@ class Deeper : public Pattern {
   public:
     Deeper(const char *str) : Pattern(str) {}
 
-    void setTimeOfStroke(float speed = 0) {
+    float setTimeOfStroke(float speedMmPerSecond = 0, float depthMm = 0, float strokeMm = 0, float sensationPercent = 0) {
         // In & Out have same time, so we need to divide by 2
-        _timeOfStroke = 0.5 * speed;
+        _timeOfStroke = 0.5 * ((min(abs(depthMm), abs(strokeMm)) * 2.0F) / speedMmPerSecond);
+        return _timeOfStroke;
     }
 
     void setSensation(float sensation) {
@@ -489,9 +500,10 @@ class StopNGo : public Pattern {
   public:
     StopNGo(const char *str) : Pattern(str) {}
 
-    void setTimeOfStroke(float speed = 0) {
+    float setTimeOfStroke(float speedMmPerSecond = 0, float depthMm = 0, float strokeMm = 0, float sensationPercent = 0) {
         // In & Out have same time, so we need to divide by 2
-        _timeOfStroke = 0.5 * speed;
+        _timeOfStroke = 0.5 * ((min(abs(depthMm), abs(strokeMm)) * 2.0F) / speedMmPerSecond);
+        return _timeOfStroke;
     }
 
     void setSensation(float sensation) {
@@ -587,9 +599,9 @@ class Insist : public Pattern {
         _updateStrokeTiming();
     }
 
-    void setTimeOfStroke(float speed = 0) {
+    float setTimeOfStroke(float speedMmPerSecond = 0, float depthMm = 0, float strokeMm = 0, float sensationPercent = 0) {
         // In & Out have same time, so we need to divide by 2
-        _timeOfStroke = 0.5 * speed;
+        _timeOfStroke = 0.5 * ((min(abs(depthMm), abs(strokeMm)) * 2.0F) / speedMmPerSecond);
         _updateStrokeTiming();
     }
 
