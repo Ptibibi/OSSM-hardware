@@ -63,7 +63,7 @@ void OSSM::drawPlayControlsTask(void *pvParameters) {
         shouldUpdateDisplay = false;
 
         next.speedKnob =
-            getAnalogAveragePercent(SampleOnPin{Pins::Remote::speedPotPin, 50});
+            round(getAnalogAveragePercent(SampleOnPin{Pins::Remote::speedPotPin, 50}));
         ossm->setting.speedKnob = next.speedKnob;
         encoder = ossm->encoder.readEncoder();
 
