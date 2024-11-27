@@ -31,8 +31,6 @@ void OSSM::startStrokeEngineTask(void *pvParameters) {
     while (isInCorrectState(ossm)) {
         if (!ossm->sm->is("strokeEngine.idle"_s)) {
             Stroker.stopMotion();
-        }else if (ossm->setting.speed == 0) {
-            Stroker.stopMotion();
         } else if (Stroker.getState() == READY) {
             Stroker.startPattern();
         }

@@ -167,6 +167,15 @@ class Pattern {
         // Time of stroke in seconds per stroke
         return float(_calRangeOfStroke() / constrain(_speed, 1, _maxSpeed));
     }
+
+    //! Set stepper in secure position if initial condition are not correct
+    virtual motionParameter _setIdleState() {
+        _nextMove.speed = int(0.05 * _maxSpeed);
+        _nextMove.acceleration = int(0.5 * _maxAcceleration);
+        _nextMove.stroke = constrain(_depth - _stroke, 0, _depth);
+        _nextMove.skip = false;
+        return _nextMove;
+    }
 };
 
 /**************************************************************************/
@@ -181,6 +190,11 @@ class SimpleStroke : public Pattern {
     SimpleStroke(const char *str) : Pattern(str) {}
 
     motionParameter nextTarget(unsigned int index) {
+        if (_speed == 0) {
+            return _setIdleState();
+        }
+        _nextMove.skip = false;
+
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
 
@@ -236,6 +250,11 @@ class TeasingPounding : public Pattern {
     }
 
     motionParameter nextTarget(unsigned int index) {
+        if (_speed == 0) {
+            return _setIdleState();
+        }
+        _nextMove.skip = false;
+
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
 
@@ -316,6 +335,11 @@ class RoboStroke : public Pattern {
     RoboStroke(const char *str) : Pattern(str) {}
 
     motionParameter nextTarget(unsigned int index) {
+        if (_speed == 0) {
+            return _setIdleState();
+        }
+        _nextMove.skip = false;
+
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
 
@@ -385,6 +409,11 @@ class HalfnHalf : public Pattern {
     }
 
     motionParameter nextTarget(unsigned int index) {
+        if (_speed == 0) {
+            return _setIdleState();
+        }
+        _nextMove.skip = false;
+
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
 
@@ -482,8 +511,12 @@ class Deeper : public Pattern {
   public:
     Deeper(const char *str) : Pattern(str) {}
 
-
     motionParameter nextTarget(unsigned int index) {
+        if (_speed == 0) {
+            return _setIdleState();
+        }
+        _nextMove.skip = false;
+
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
 
@@ -562,6 +595,10 @@ class StopNGo : public Pattern {
     }
 
     motionParameter nextTarget(unsigned int index) {
+        if (_speed == 0) {
+            return _setIdleState();
+        }
+        _nextMove.skip = false;
 
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
@@ -651,8 +688,24 @@ class Insist : public Pattern {
   public:
     Insist(const char *str) : Pattern(str) {}
 
+    //! Set stepper in secure position if initial condition are not correct
+    virtual motionParameter _setIdleState() {
+        _nextMove.speed = int(0.05 * _maxSpeed);
+        _nextMove.acceleration = int(0.5 * _maxAcceleration);
+        _updateRealStroke();
+        if (_strokeInFront)
+            _nextMove.stroke = constrain(_depth - _realStroke, 0, _depth);
+        else
+            _nextMove.stroke = constrain(_depth - _stroke, 0, _depth);
+        _nextMove.skip = false;
+        return _nextMove;
+    }
 
     motionParameter nextTarget(unsigned int index) {
+        if (_speed == 0) {
+            return _setIdleState();
+        }
+        _nextMove.skip = false;
 
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
