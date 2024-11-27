@@ -29,12 +29,9 @@ void OSSM::startStrokeEngineTask(void *pvParameters) {
     };
 
     while (isInCorrectState(ossm)) {
-        if (isChangeSignificant(lastSetting.speed, ossm->setting.speed)) {
-            if (ossm->setting.speed == 0) {
-                Stroker.stopMotion();
-            } else if (Stroker.getState() == READY) {
-                Stroker.startPattern();
-            }
+        if (Stroker.getState() == READY) {
+            Stroker.startPattern();
+        }
 
         if (isChangeSignificant(lastSetting.speed, ossm->setting.speed)) {
             float newSpeed = (Config::Driver::maxSpeedMmPerSecond * ossm->setting.speed) / 100.0F;
