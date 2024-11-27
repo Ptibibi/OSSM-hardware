@@ -36,7 +36,11 @@ void OSSM::startStrokeEngineTask(void *pvParameters) {
                 Stroker.startPattern();
             }
 
-            Stroker.setSpeed(ossm->setting.speed * 3, true);
+        if (isChangeSignificant(lastSetting.speed, ossm->setting.speed)) {
+            float newSpeed = (Config::Driver::maxSpeedMmPerSecond * ossm->setting.speed) / 100.0F;
+            ESP_LOGD("UTILS", "change speed: %f %f", ossm->setting.speed,
+                     newSpeed);
+            Stroker.setSpeed(newSpeed, true);
             lastSetting.speed = ossm->setting.speed;
         }
 
