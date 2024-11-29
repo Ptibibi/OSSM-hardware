@@ -10,6 +10,18 @@
 namespace Config {
 
     /**
+        Default drive settings
+*/
+    namespace ResetSettings {
+
+        // Default settings to start in safe
+        constexpr float speed = 0.0f;
+        constexpr float depth = 0.0f;
+        constexpr float stroke = 10.0f;
+        constexpr float sensation = 50.0f;
+    }
+
+    /**
             Motion System Config
     */
     namespace Driver {
@@ -106,6 +118,41 @@ namespace Config {
 
         constexpr float accelerationScaling = 100.0f;
 
+    }
+
+
+    /**
+        Remote Config
+*/
+    namespace Remote {
+
+        // Speed lerp of speed for SinglePenetration and StrokeEngine mode
+        // Time cycle is approximately 100-200ms in fact system load
+        namespace SpeedLerp {
+            constexpr float UpPercentPerCycle = 100.0f;
+            constexpr float DownPercentPerCycle = 100.0f;
+        }
+
+        // Speed lerp of stroke for StrokeEngine mode
+        // Time cycle is approximately 100-200ms in fact system load
+        namespace StrokedLerp {
+            constexpr float UpPercentPerCycle = 100.0f;
+            constexpr float DownPercentPerCycle = 100.0f;
+        }
+
+        // Speed lerp of depth for StrokeEngine mode
+        // Time cycle is approximately 100-200ms in fact system load
+        namespace DepthLerp {
+            constexpr float UpPercentPerCycle = 100.0f;
+            constexpr float DownPercentPerCycle = 100.0f;
+        }
+
+        // Speed lerp of sensation for StrokeEngine mode
+        // Time cycle is approximately 100-200ms in fact system load
+        namespace SensationLerp {
+            constexpr float UpPercentPerCycle = 100.0f;
+            constexpr float DownPercentPerCycle = 100.0f;
+        }
     }
 
 }

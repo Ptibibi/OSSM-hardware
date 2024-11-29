@@ -23,9 +23,12 @@ void OSSM::drawPlayControlsTask(void *pvParameters) {
             break;
     }
 
-    auto menuString = menuStrings[ossm->menuOption];
+    SettingPercents next;
+    next.speed = ossm->setting.speed;
+    next.stroke = ossm->setting.stroke;
+    next.depth = ossm->setting.depth;
+    next.sensation = ossm->setting.sensation;
 
-    SettingPercents next = {0, 0, 0, 0};
     unsigned long displayLastUpdated = 0;
 
     /**
@@ -39,9 +42,7 @@ void OSSM::drawPlayControlsTask(void *pvParameters) {
      */
     auto isInCorrectState = [](OSSM *ossm) {
         // Add any states that you want to support here.
-        return ossm->sm->is("simplePenetration"_s) ||
-               ossm->sm->is("simplePenetration.idle"_s) ||
-               ossm->sm->is("strokeEngine"_s) ||
+        return ossm->sm->is("strokeEngine"_s) ||
                ossm->sm->is("strokeEngine.idle"_s);
     };
 
@@ -50,55 +51,71 @@ void OSSM::drawPlayControlsTask(void *pvParameters) {
     short lh4 = 64;
     static float encoder = 0;
 
-    bool isStrokeEngine =
-        ossm->sm->is("strokeEngine"_s) || ossm->sm->is("strokeEngine.idle"_s);
-
-    bool shouldUpdateDisplay = false;
-
     // This small break gives the encoder a minute to settle.
     vTaskDelay(100);
-
     while (isInCorrectState(ossm)) {
         // Always assume the display should not update.
-        shouldUpdateDisplay = false;
+        bool shouldUpdateDisplay = false;
 
-        next.speedKnob =
-            getAnalogAveragePercent(SampleOnPin{Pins::Remote::speedPotPin, 50});
-        ossm->setting.speedKnob = next.speedKnob;
+        /**
+         * ////////////////////////////////////////////
+         * ///////////    Manage analog    ////////////
+         * ////////////////////////////////////////////
+         */
+        next.speed = round(getAnalogAveragePercent(SampleOnPin{Pins::Remote::speedPotPin, 50}));
+
+        /**
+         * /////////////////////////////////////////////
+         * ///////////    Manage encoder    ////////////
+         * /////////////////////////////////////////////
+         */
         encoder = ossm->encoder.readEncoder();
-
-        next.speed = next.speedKnob;
-
-        if (next.speed != ossm->setting.speed) {
-            shouldUpdateDisplay = true;
-            ossm->setting.speed = next.speed;
-        }
-
         switch (ossm->playControl) {
+            // STROKE used for SinglePenetration and StrokeEngine
             case PlayControls::STROKE:
                 next.stroke = encoder;
-                shouldUpdateDisplay = shouldUpdateDisplay ||
-                                      next.stroke - ossm->setting.stroke >= 1;
-                ossm->setting.stroke = next.stroke;
                 break;
+            // SENSATION used for StrokeEngine
             case PlayControls::SENSATION:
                 next.sensation = encoder;
-                shouldUpdateDisplay =
-                    shouldUpdateDisplay ||
-                    next.sensation - ossm->setting.sensation >= 1;
-                ossm->setting.sensation = next.sensation;
                 break;
+            // DEPTH used for StrokeEngine
             case PlayControls::DEPTH:
                 next.depth = encoder;
-                shouldUpdateDisplay = shouldUpdateDisplay ||
-                                      next.depth - ossm->setting.depth >= 1;
-                ossm->setting.depth = next.depth;
                 break;
         }
 
-        shouldUpdateDisplay =
-            shouldUpdateDisplay || millis() - displayLastUpdated > 1000;
+        /**
+         * //////////////////////////////////////////////
+         * /////////// Inputs update display ////////////
+         * //////////////////////////////////////////////
+         */
+        shouldUpdateDisplay = shouldUpdateDisplay || next.speed != ossm->setting.speed;
+        shouldUpdateDisplay = shouldUpdateDisplay || next.stroke !=  ossm->setting.stroke;
+        shouldUpdateDisplay = shouldUpdateDisplay || next.sensation != ossm->setting.sensation;
+        shouldUpdateDisplay = shouldUpdateDisplay || next.depth != ossm->setting.depth;
 
+        shouldUpdateDisplay = shouldUpdateDisplay || millis() - displayLastUpdated > 1000;
+
+        /**
+         * /////////////////////////////////////////////
+         * ///////////   Apply lerp input   ////////////
+         * /////////////////////////////////////////////
+         */
+        ossm->setting.speed = applyLerp(ossm->setting.speed, next.speed,
+                                        Config::Remote::SpeedLerp::UpPercentPerCycle,
+                                        Config::Remote::SpeedLerp::DownPercentPerCycle);
+        ossm->setting.stroke = applyLerp(ossm->setting.stroke, next.stroke,
+                                        Config::Remote::StrokedLerp::UpPercentPerCycle,
+                                        Config::Remote::StrokedLerp::DownPercentPerCycle);
+        ossm->setting.sensation = applyLerp(ossm->setting.sensation, next.sensation,
+                                            Config::Remote::DepthLerp::UpPercentPerCycle,
+                                            Config::Remote::DepthLerp::DownPercentPerCycle);
+        ossm->setting.depth = applyLerp(ossm->setting.depth, next.depth,
+                                        Config::Remote::SensationLerp::UpPercentPerCycle,
+                                        Config::Remote::SensationLerp::DownPercentPerCycle);
+
+        // Waiting and continue if display not updated
         if (!shouldUpdateDisplay) {
             vTaskDelay(100);
             continue;
@@ -113,36 +130,30 @@ void OSSM::drawPlayControlsTask(void *pvParameters) {
         ossm->display.clearBuffer();
         ossm->display.setFont(Config::Font::base);
 
-        drawShape::settingBar(UserConfig::language.Speed, next.speedKnob);
+        drawShape::settingBar(UserConfig::language.Speed, next.speed, ossm->setting.speed);
 
-        if (isStrokeEngine) {
-            drawStr::centered(32, UserConfig::language.StrokeEngineNames[(int)ossm->setting.pattern]);
+        drawStr::centered(32, UserConfig::language.StrokeEngineNames[(int)ossm->setting.pattern]);
+        if (ossm->setting.pattern == StrokePatterns::SimplePenetration) {
+            drawShape::settingBar("Depth", next.depth, ossm->setting.depth, 128, 0, RIGHT_ALIGNED);
+        }
+        else {
             switch (ossm->playControl) {
+                case PlayControls::DEPTH:
+                    drawShape::settingBar("Depth", next.depth, ossm->setting.depth, 118, 0, RIGHT_ALIGNED);
+                    drawShape::settingBarSmall(next.stroke, ossm->setting.stroke, 120);
+                    drawShape::settingBarSmall(next.sensation, ossm->setting.sensation, 125);
+                    break;
                 case PlayControls::STROKE:
-                    drawShape::settingBarSmall(ossm->setting.sensation, 125);
-                    drawShape::settingBarSmall(ossm->setting.depth, 120);
-                    drawShape::settingBar(strokeString, ossm->setting.stroke,
-                                          118, 0, RIGHT_ALIGNED);
+                    drawShape::settingBarSmall(next.depth, ossm->setting.depth, 108);
+                    drawShape::settingBar(strokeString, next.stroke, ossm->setting.stroke, 123, 0, RIGHT_ALIGNED, 5);
+                    drawShape::settingBarSmall(next.sensation, ossm->setting.sensation, 125);
                     break;
                 case PlayControls::SENSATION:
-                    drawShape::settingBar("Sensation", ossm->setting.sensation,
-                                          128, 0, RIGHT_ALIGNED, 10);
-                    drawShape::settingBarSmall(ossm->setting.depth, 113);
-                    drawShape::settingBarSmall(ossm->setting.stroke, 108);
-
-                    break;
-                case PlayControls::DEPTH:
-                    drawShape::settingBarSmall(ossm->setting.sensation, 125);
-                    drawShape::settingBar("Depth", ossm->setting.depth, 123, 0,
-                                          RIGHT_ALIGNED, 5);
-                    drawShape::settingBarSmall(ossm->setting.stroke, 108);
-
+                    drawShape::settingBarSmall(next.depth, ossm->setting.depth, 108);
+                    drawShape::settingBarSmall(next.stroke, ossm->setting.stroke, 113);
+                    drawShape::settingBar("Sensation", next.sensation, ossm->setting.sensation, 128, 0, RIGHT_ALIGNED, 10);
                     break;
             }
-        } else {
-            drawStr::multiLine(15, 32, UserConfig::language.SimplePenetration);
-            drawShape::settingBar(strokeString, ossm->encoder.readEncoder(),
-                                  118, 0, RIGHT_ALIGNED);
         }
 
         /**
@@ -152,9 +163,10 @@ void OSSM::drawPlayControlsTask(void *pvParameters) {
          *
          * These controls are associated with stroke and distance
          */
-        ossm->display.setFont(Config::Font::small);
-        strokeString = "# " + String(ossm->sessionStrokeCount);
-        ossm->display.drawUTF8(14, lh4, strokeString.c_str());
+        // TODO: Need to migrate sessionStrokeCount in StrokeEngine
+        // ossm->display.setFont(Config::Font::small);
+        // strokeString = "# " + String(ossm->sessionStrokeCount);
+        // ossm->display.drawUTF8(14, lh4, strokeString.c_str());
 
         /**
          * /////////////////////////////////////////////
@@ -163,16 +175,12 @@ void OSSM::drawPlayControlsTask(void *pvParameters) {
          *
          * These controls are associated with stroke and distance
          */
+        // TODO: Need to migrate sessionDistanceMeters in StrokeEngine
+        // strokeString = formatDistance(ossm->sessionDistanceMeters);
+        // stringWidth = ossm->display.getUTF8Width(strokeString.c_str());
+        // ossm->display.drawUTF8(104 - stringWidth, lh3, strokeString.c_str());
 
-        if (!isStrokeEngine) {
-            strokeString = formatDistance(ossm->sessionDistanceMeters);
-            stringWidth = ossm->display.getUTF8Width(strokeString.c_str());
-            ossm->display.drawUTF8(104 - stringWidth, lh3,
-                                   strokeString.c_str());
-        }
-
-        strokeString =
-            formatTime(displayLastUpdated - ossm->sessionStartTime).c_str();
+        strokeString = formatTime(displayLastUpdated - ossm->sessionStartTime).c_str();
         stringWidth = ossm->display.getUTF8Width(strokeString.c_str());
         ossm->display.drawUTF8(104 - stringWidth, lh4, strokeString.c_str());
 
@@ -189,4 +197,14 @@ void OSSM::drawPlayControls() {
     int stackSize = 3 * configMINIMAL_STACK_SIZE;
     xTaskCreate(drawPlayControlsTask, "drawPlayControlsTask", stackSize, this,
                 1, &drawPlayControlsTaskH);
+}
+
+// Apply lerp in current value to move to target value
+float OSSM::applyLerp(float current, float target,
+                      float increaseValue, float decreaseValue) {
+    if (target > current)
+        current = constrain(current + increaseValue, current, target);
+    else
+        current = constrain(current - decreaseValue, target, current);
+    return current;
 }

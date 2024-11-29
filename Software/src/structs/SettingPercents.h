@@ -2,7 +2,7 @@
 #define SOFTWARE_SETTINGPERCENTS_H
 
 enum class StrokePatterns {
-    SimpleStroke,
+    SimplePenetration,
     TeasingPounding,
     RoboStroke,
     HalfnHalf,
@@ -17,7 +17,6 @@ struct SettingPercents {
     float sensation;
     float depth;
     StrokePatterns pattern;
-    float speedKnob;
 };
 
 #endif  // SOFTWARE_SETTINGPERCENTS_H

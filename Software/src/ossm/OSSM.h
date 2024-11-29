@@ -59,6 +59,7 @@ class OSSM {
             // Action definitions to make the table easier to read.
             auto drawHello = [](OSSM &o) { o.drawHello(); };
             auto drawMenu = [](OSSM &o) { o.drawMenu(); };
+            auto drawMenuSettings = [](OSSM &o) { o.drawMenuSettings(); };
             auto startHoming = [](OSSM &o) {
                 o.clearHoming();
                 o.startHoming();
@@ -67,11 +68,11 @@ class OSSM {
             auto drawPatternControls = [](OSSM &o) { o.drawPatternControls(); };
             auto drawPreflight = [](OSSM &o) { o.drawPreflight(); };
             auto resetSettings = [](OSSM &o) {
-                o.setting.speed = 0;
-                o.setting.stroke = 0;
-                o.setting.depth = 50;
-                o.setting.sensation = 50;
-                o.playControl = PlayControls::STROKE;
+                o.setting.speed = Config::ResetSettings::speed;
+                o.setting.stroke = Config::ResetSettings::stroke;
+                o.setting.depth = Config::ResetSettings::depth;
+                o.setting.sensation = Config::ResetSettings::sensation;
+                o.playControl = PlayControls::DEPTH;
 
                 // Prepare the encoder
                 o.encoder.setBoundaries(0, 100, false);
@@ -85,15 +86,17 @@ class OSSM {
             };
 
             auto incrementControl = [](OSSM &o) {
-                o.playControl =
-                    static_cast<PlayControls>((o.playControl + 1) % 3);
+                if (o.setting.pattern == StrokePatterns::SimplePenetration)
+                    o.playControl = PlayControls::DEPTH;
+                else
+                    o.playControl = static_cast<PlayControls>((o.playControl + 1) % 3);
 
                 switch (o.playControl) {
-                    case PlayControls::STROKE:
-                        o.encoder.setEncoderValue(o.setting.stroke);
-                        break;
                     case PlayControls::DEPTH:
                         o.encoder.setEncoderValue(o.setting.depth);
+                        break;
+                    case PlayControls::STROKE:
+                        o.encoder.setEncoderValue(o.setting.stroke);
                         break;
                     case PlayControls::SENSATION:
                         o.encoder.setEncoderValue(o.setting.sensation);
@@ -101,9 +104,6 @@ class OSSM {
                 }
             };
 
-            auto startSimplePenetration = [](OSSM &o) {
-                o.startSimplePenetration();
-            };
             auto startStrokeEngine = [](OSSM &o) { o.startStrokeEngine(); };
             auto emergencyStop = [](OSSM &o) {
                 o.stepper->forceStop();
@@ -144,10 +144,8 @@ class OSSM {
                 return [option](OSSM &o) { return o.menuOption == option; };
             };
 
-            auto isPreflightSafe = [](OSSM &o) {
-                return getAnalogAveragePercent(
-                           {Pins::Remote::speedPotPin, 50}) <
-                       Config::Advanced::commandDeadZonePercentage;
+            auto isSettingsOption = [](MenuSettings option) {
+                return [option](OSSM &o) { return o.menuSettingsOption == option; };
             };
 
             auto isFirstHomed = [](OSSM &o) {
@@ -176,31 +174,27 @@ class OSSM {
                 "homing.backward"_s + error = "error"_s,
                 "homing.backward"_s + done[(isStrokeTooShort)] = "error"_s,
                 "homing.backward"_s + done[isFirstHomed] / setHomed = "menu"_s,
-                "homing.backward"_s + done[(isOption(Menu::SimplePenetration))] / setHomed = "simplePenetration"_s,
                 "homing.backward"_s + done[(isOption(Menu::StrokeEngine))] / setHomed = "strokeEngine"_s,
 
                 "menu"_s / (drawMenu, startWifi) = "menu.idle"_s,
-                "menu.idle"_s + buttonPress[(isOption(Menu::SimplePenetration))] = "simplePenetration"_s,
                 "menu.idle"_s + buttonPress[(isOption(Menu::StrokeEngine))] = "strokeEngine"_s,
-                "menu.idle"_s + buttonPress[(isOption(Menu::UpdateOSSM))] = "update"_s,
-                "menu.idle"_s + buttonPress[(isOption(Menu::WiFiSetup))] = "wifi"_s,
-                "menu.idle"_s + buttonPress[isOption(Menu::Help)] = "help"_s,
-                "menu.idle"_s + buttonPress[(isOption(Menu::Restart))] = "restart"_s,
+                "menu.idle"_s + buttonPress[(isOption(Menu::Settings))] = "menuSettings"_s,
 
-                "simplePenetration"_s [isNotHomed] = "homing"_s,
-                "simplePenetration"_s [isPreflightSafe] / (resetSettings, drawPlayControls, startSimplePenetration) = "simplePenetration.idle"_s,
-                "simplePenetration"_s / drawPreflight = "simplePenetration.preflight"_s,
-                "simplePenetration.preflight"_s + done / (resetSettings, drawPlayControls, startSimplePenetration) = "simplePenetration.idle"_s,
-                "simplePenetration.idle"_s + longPress / (emergencyStop, setNotHomed) = "menu"_s,
+                "menuSettings"_s / (drawMenuSettings) = "menuSettings.idle"_s,
+                "menuSettings.idle"_s + buttonPress[(isSettingsOption(MenuSettings::UpdateOSSM))] = "update"_s,
+                "menuSettings.idle"_s + buttonPress[(isSettingsOption(MenuSettings::WiFiSetup))] = "wifi"_s,
+                "menuSettings.idle"_s + buttonPress[isSettingsOption(MenuSettings::Help)] = "help"_s,
+                "menuSettings.idle"_s + buttonPress[(isSettingsOption(MenuSettings::Restart))] = "restart"_s,
+                "menuSettings.idle"_s + longPress = "menu"_s,
 
                 "strokeEngine"_s [isNotHomed] = "homing"_s,
-                "strokeEngine"_s [isPreflightSafe] / (resetSettings, drawPlayControls, startStrokeEngine) = "strokeEngine.idle"_s,
                 "strokeEngine"_s / drawPreflight = "strokeEngine.preflight"_s,
                 "strokeEngine.preflight"_s + done / (resetSettings, drawPlayControls, startStrokeEngine) = "strokeEngine.idle"_s,
+                "strokeEngine.transition"_s + done / (drawPlayControls, startStrokeEngine) = "strokeEngine.idle"_s,
                 "strokeEngine.idle"_s + buttonPress / incrementControl = "strokeEngine.idle"_s,
                 "strokeEngine.idle"_s + doublePress / drawPatternControls = "strokeEngine.pattern"_s,
-                "strokeEngine.pattern"_s + buttonPress / drawPlayControls = "strokeEngine.idle"_s,
-                "strokeEngine.pattern"_s + doublePress / drawPlayControls = "strokeEngine.idle"_s,
+                "strokeEngine.pattern"_s + buttonPress / drawPreflight = "strokeEngine.transition"_s,
+                "strokeEngine.pattern"_s + doublePress / drawPreflight = "strokeEngine.transition"_s,
                 "strokeEngine.pattern"_s + longPress / (emergencyStop, setNotHomed) = "menu"_s,
                 "strokeEngine.idle"_s + longPress / (emergencyStop, setNotHomed) = "menu"_s,
 
@@ -208,15 +202,15 @@ class OSSM {
                 "update"_s = "wifi"_s,
                 "update.checking"_s [isUpdateAvailable] / (drawUpdating, updateOSSM) = "update.updating"_s,
                 "update.checking"_s / drawNoUpdate = "update.idle"_s,
-                "update.idle"_s + buttonPress = "menu"_s,
+                "update.idle"_s + buttonPress = "menuSettings"_s,
                 "update.updating"_s  = X,
 
                 "wifi"_s / drawWiFi = "wifi.idle"_s,
-                "wifi.idle"_s + done / stopWifiPortal = "menu"_s,
-                "wifi.idle"_s + buttonPress / stopWifiPortal = "menu"_s,
+                "wifi.idle"_s + done / stopWifiPortal = "menuSettings"_s,
+                "wifi.idle"_s + buttonPress / stopWifiPortal = "menuSettings"_s,
 
                 "help"_s / drawHelp = "help.idle"_s,
-                "help.idle"_s + buttonPress = "menu"_s,
+                "help.idle"_s + buttonPress = "menuSettings"_s,
 
                 "error"_s / drawError = "error.idle"_s,
                 "error.idle"_s + buttonPress / drawHelp = "error.help"_s,
@@ -255,13 +249,15 @@ class OSSM {
     bool isForward = true;
 
     Menu menuOption;
+    MenuSettings menuSettingsOption;
+
     String errorMessage = "";
 
     SettingPercents setting = {.speed = 0,
                                .stroke = 0,
                                .sensation = 50,
                                .depth = 50,
-                               .pattern = StrokePatterns::SimpleStroke};
+                               .pattern = StrokePatterns::SimplePenetration};
 
     unsigned long sessionStartTime = 0;
     int sessionStrokeCount = 0;
@@ -280,8 +276,6 @@ class OSSM {
 
     void startHoming();
 
-    void startSimplePenetration();
-
     bool isStrokeTooShort();
 
     void drawError();
@@ -293,6 +287,7 @@ class OSSM {
     void drawWiFi();
 
     void drawMenu();
+    void drawMenuSettings();
 
     void drawPlayControls();
     void drawPatternControls();
@@ -311,8 +306,13 @@ class OSSM {
     static void drawHelloTask(void *pvParameters);
 
     static void drawMenuTask(void *pvParameters);
+    static void drawMenuSettingsTask(void *pvParameters);
+    static void drawMenuOnDisplay(OSSM *ossm, String *menuStrings,
+                                  int lastIdx, int idx, int nextIdx,
+                                  int numberIdx);
 
     static void drawPlayControlsTask(void *pvParameters);
+    static float applyLerp(float current, float target, float increaseValue, float decreaseValue);
     static void drawPatternControlsTask(void *pvParameters);
 
     void drawUpdate();
@@ -322,8 +322,6 @@ class OSSM {
 
     void drawPreflight();
     static void drawPreflightTask(void *pvParameters);
-
-    static void startSimplePenetrationTask(void *pvParameters);
 
     static void startStrokeEngineTask(void *pvParameters);
 

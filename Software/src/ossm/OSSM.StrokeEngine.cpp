@@ -19,24 +19,27 @@ void OSSM::startStrokeEngineTask(void *pvParameters) {
     Stroker.setDepth(0.01f * ossm->setting.depth * abs(measuredStrokeMm), true);
     Stroker.setStroke(0.01f * ossm->setting.stroke * abs(measuredStrokeMm),
                       true);
-    Stroker.moveToMax(10 * 3);
 
     auto isInCorrectState = [](OSSM *ossm) {
         // Add any states that you want to support here.
         return ossm->sm->is("strokeEngine"_s) ||
                ossm->sm->is("strokeEngine.idle"_s) ||
-               ossm->sm->is("strokeEngine.pattern"_s);
+               ossm->sm->is("strokeEngine.pattern"_s) ||
+               ossm->sm->is("strokeEngine.transition"_s);
     };
 
     while (isInCorrectState(ossm)) {
-        if (isChangeSignificant(lastSetting.speed, ossm->setting.speed)) {
-            if (ossm->setting.speed == 0) {
-                Stroker.stopMotion();
-            } else if (Stroker.getState() == READY) {
-                Stroker.startPattern();
-            }
+        if (!ossm->sm->is("strokeEngine.idle"_s)) {
+            Stroker.stopMotion();
+        } else if (Stroker.getState() == READY) {
+            Stroker.startPattern();
+        }
 
-            Stroker.setSpeed(ossm->setting.speed * 3, true);
+        if (isChangeSignificant(lastSetting.speed, ossm->setting.speed)) {
+            float newSpeed = (Config::Driver::maxSpeedMmPerSecond * ossm->setting.speed) / 100.0F;
+            ESP_LOGD("UTILS", "change speed: %f %f", ossm->setting.speed,
+                     newSpeed);
+            Stroker.setSpeed(newSpeed, true);
             lastSetting.speed = ossm->setting.speed;
         }
 
@@ -70,9 +73,9 @@ void OSSM::startStrokeEngineTask(void *pvParameters) {
             ESP_LOGD("UTILS", "change pattern: %d", ossm->setting.pattern);
 
             switch (ossm->setting.pattern) {
-                case StrokePatterns::SimpleStroke:
-                    Stroker.setPattern(new SimpleStroke("Simple Stroke"),
-                                       false);
+                case StrokePatterns::SimplePenetration:
+                    ossm->playControl = PlayControls::DEPTH; // Init PlayControl because SimplePenetration pattern use only depth control
+                    Stroker.setPattern(new SimplePenetration("Simple Penetration"), false);
                     break;
                 case StrokePatterns::TeasingPounding:
                     Stroker.setPattern(new TeasingPounding("Teasing Pounding"),
