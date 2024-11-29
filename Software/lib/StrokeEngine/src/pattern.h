@@ -189,6 +189,15 @@ class SimplePenetration : public Pattern {
   public:
     SimplePenetration(const char *str) : Pattern(str) {}
 
+    //! Set stepper in secure position if initial condition are not correct
+    virtual motionParameter _setIdleState() {
+        _nextMove.speed = int(0.05 * _maxSpeed);
+        _nextMove.acceleration = int(0.5 * _maxAcceleration);
+        _nextMove.stroke = 0;
+        _nextMove.skip = false;
+        return _nextMove;
+    }
+
     motionParameter nextTarget(unsigned int index) {
         if (_speed == 0) {
             return _setIdleState();
