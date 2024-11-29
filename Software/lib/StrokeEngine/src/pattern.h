@@ -271,7 +271,7 @@ class TeasingPounding : public Pattern {
         // odd stroke is moving out
         if (index % 2) {
             // maximum speed of the trapezoidal motion
-            _nextMove.speed = constrain(int(1.5 * _stroke / _timeOfOutStroke), 0, _maxSpeed);
+            _nextMove.speed = constrain(int(1.5 * _calRangeOfStroke() / _timeOfOutStroke), 0, _maxSpeed);
 
             // acceleration to meet the profile
             _nextMove.acceleration = int(constrain((3.0 * _nextMove.speed) / _timeOfOutStroke, 0, _maxAcceleration));
@@ -282,7 +282,7 @@ class TeasingPounding : public Pattern {
         // even stroke is moving in
         } else {
             // maximum speed of the trapezoidal motion
-            _nextMove.speed = constrain(int(1.5 * _stroke / _timeOfInStroke), 0, _maxSpeed);
+            _nextMove.speed = constrain(int(1.5 * _calRangeOfStroke() / _timeOfInStroke), 0, _maxSpeed);
 
             // acceleration to meet the profile
             _nextMove.acceleration = int(constrain((3.0 * _nextMove.speed) / _timeOfInStroke, 0, _maxAcceleration));
@@ -407,8 +407,6 @@ class HalfnHalf : public Pattern {
   public:
     HalfnHalf(const char *str) : Pattern(str) {}
 
-    //TODO: Fix speed stability between full and half motion
-
     //! Calculate time of stroke in Second by stroke
     virtual float _calTimeOfStroke() {
         // Time of stroke in seconds per stroke
@@ -435,16 +433,16 @@ class HalfnHalf : public Pattern {
         }
 
         // set-up the stroke length
-        int stroke = _stroke;
+        int stroke = _calRangeOfStroke();
         if (_half == true) {
             // half the stroke length
-            stroke = _stroke / 2;
+            stroke = _calRangeOfStroke() / 2;
         }
 
         // odd stroke is moving out
         if (index % 2) {
             // maximum speed of the trapezoidal motion
-            _nextMove.speed = constrain(int(1.5 * _stroke / _timeOfOutStroke), 0, _maxSpeed);
+            _nextMove.speed = constrain(int(1.5 * _calRangeOfStroke() / _timeOfOutStroke), 0, _maxSpeed);
 
             // acceleration to meet the profile
             _nextMove.acceleration = constrain(int(3.0 * float(_nextMove.speed) / _timeOfOutStroke), 0, _maxAcceleration);
@@ -458,7 +456,7 @@ class HalfnHalf : public Pattern {
         // even stroke is moving in
         } else {
             // maximum speed of the trapezoidal motion
-            _nextMove.speed = constrain(int(1.5 * _stroke / _timeOfInStroke), 0, _maxSpeed);
+            _nextMove.speed = constrain(int(1.5 * _calRangeOfStroke() / _timeOfInStroke), 0, _maxSpeed);
 
             // acceleration to meet the profile
             _nextMove.acceleration = constrain(int(3.0 * float(_nextMove.speed) / _timeOfInStroke), 0, _maxAcceleration);
@@ -535,7 +533,7 @@ class Deeper : public Pattern {
         }
 
         // How many steps is each stroke advancing
-        int slope = _stroke / (_countStrokesForRamp);
+        int slope = _calRangeOfStroke() / (_countStrokesForRamp);
 
         // The pattern recycles so we use modulo to get a cycling index.
         // Factor 2 because index increments with each full stroke twice
@@ -772,6 +770,6 @@ class Insist : public Pattern {
         _strokeInFront = (_sensation > 0) ? true : false;
 
         // Calculate fractional stroke length
-        _realStroke = int((float)_stroke * _strokeFraction);
+        _realStroke = int((float)_calRangeOfStroke() * _strokeFraction);
     }
 };
