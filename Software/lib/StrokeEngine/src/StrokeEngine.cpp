@@ -769,6 +769,11 @@ void StrokeEngine::_stroking() {
                 }
             }
 
+            if (currentMotion.reset_pattern == true) {
+                // reset index to restart pattern
+                _index = -1;
+            }
+
             // give back mutex
             xSemaphoreGive(_patternMutex);
         }

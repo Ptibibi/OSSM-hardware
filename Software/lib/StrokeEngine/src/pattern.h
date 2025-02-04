@@ -37,6 +37,7 @@ typedef struct {
     int acceleration;  //!< Acceleration to get to speed or halt
     bool skip;  //!< no valid stroke, skip this set an query for the next -->
                 //!< allows pauses between strokes
+    bool reset_pattern; //!< yes to indicate do need to reset pattern cycle
 } motionParameter;
 
 /**************************************************************************/
@@ -174,6 +175,7 @@ class Pattern {
         _nextMove.acceleration = int(0.5 * _maxAcceleration);
         _nextMove.stroke = constrain(_depth - _stroke, 0, _depth);
         _nextMove.skip = false;
+        _nextMove.reset_pattern = true;
         return _nextMove;
     }
 };
@@ -195,6 +197,7 @@ class SimplePenetration : public Pattern {
         _nextMove.acceleration = int(0.5 * _maxAcceleration);
         _nextMove.stroke = 0;
         _nextMove.skip = false;
+        _nextMove.reset_pattern = true;
         return _nextMove;
     }
 
@@ -203,6 +206,7 @@ class SimplePenetration : public Pattern {
             return _setIdleState();
         }
         _nextMove.skip = false;
+        _nextMove.reset_pattern = false;
 
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
@@ -261,6 +265,7 @@ class TeasingPounding : public Pattern {
             return _setIdleState();
         }
         _nextMove.skip = false;
+        _nextMove.reset_pattern = false;
 
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
@@ -346,6 +351,7 @@ class RoboStroke : public Pattern {
             return _setIdleState();
         }
         _nextMove.skip = false;
+        _nextMove.reset_pattern = false;
 
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
@@ -418,6 +424,7 @@ class HalfnHalf : public Pattern {
             return _setIdleState();
         }
         _nextMove.skip = false;
+        _nextMove.reset_pattern = false;
 
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
@@ -521,6 +528,7 @@ class Deeper : public Pattern {
             return _setIdleState();
         }
         _nextMove.skip = false;
+        _nextMove.reset_pattern = false;
 
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
@@ -604,6 +612,7 @@ class StopNGo : public Pattern {
             return _setIdleState();
         }
         _nextMove.skip = false;
+        _nextMove.reset_pattern = false;
 
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
@@ -703,6 +712,7 @@ class Insist : public Pattern {
         else
             _nextMove.stroke = constrain(_depth - _stroke, 0, _depth);
         _nextMove.skip = false;
+        _nextMove.reset_pattern = true;
         return _nextMove;
     }
 
@@ -711,6 +721,7 @@ class Insist : public Pattern {
             return _setIdleState();
         }
         _nextMove.skip = false;
+        _nextMove.reset_pattern = false;
 
         // Time of stroke in seconds per stroke
         _timeOfStroke = _calTimeOfStroke();
