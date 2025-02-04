@@ -9,6 +9,7 @@ enum class StrokePatterns {
     Deeper,
     StopNGo,
     Insist,
+    Random
 };
 
 struct SettingPercents {

@@ -784,3 +784,70 @@ class Insist : public Pattern {
         _realStroke = int((float)_calRangeOfStroke() * _strokeFraction);
     }
 };
+
+/**************************************************************************/
+/*!
+  @brief  Sensation reduces the effective stroke length while keeping the
+  stroke speed constant to the full stroke. This creates interesting
+  vibrational pattern at higher sensation values. With positive sensation the
+  strokes will wander towards the front, with negative values towards the back.
+*/
+/**************************************************************************/
+class Random : public Pattern {
+  public:
+    Random(const char *str) : Pattern(str) {}
+
+    motionParameter nextTarget(unsigned int index) {
+        if (_speed == 0) {
+            return _setIdleState();
+        }
+        _nextMove.skip = false;
+        _nextMove.reset_pattern = false;
+
+        // Time of stroke in seconds per stroke
+        _timeOfStroke = _calTimeOfStroke();
+
+        // maximum speed of the trapezoidal motion
+        _nextMove.speed = constrain(1.5 * _speed, 0, _maxSpeed);
+
+        // acceleration to meet the profile
+        _nextMove.acceleration = constrain((3.0 * _nextMove.speed) / _timeOfStroke, 0, _maxAcceleration);
+
+        // Define motion limites
+        int max = _depth;
+        int min = _depth - _stroke;
+        int fullMotion = (max - min) / 2;
+        int rangeMotion = fullMotion * (100.0f - abs(_sensation)) / 100.0f;
+        int maxMotion = constrain(_lastStroke + rangeMotion, min, max);
+        int minMotion = constrain(_lastStroke - rangeMotion, min, max);
+
+        // Generate random stroke
+        srand(time(NULL)); // Seed the time
+        // odd stroke is moving out
+        if (index % 2) {
+            _nextMove.stroke = rand()%(_lastStroke - minMotion + 1) + minMotion;
+
+            // even stroke is moving in
+        } else {
+            _nextMove.stroke = rand()%(maxMotion - _lastStroke + 1) + _lastStroke;
+        }
+        //srand(time(NULL)); // Seed the time
+        //_nextMove.stroke = rand()%(maxMotion-minMotion+1)+minMotion;
+        _lastStroke = _nextMove.stroke;
+
+        _index = index;
+#ifdef DEBUG_PATTERN
+        Serial.println("_index: " + String(_index));
+        Serial.println("_timeOfStroke: " + String(_timeOfStroke));
+        Serial.println("_nextMove.speed: " + String(_nextMove.speed));
+        Serial.println("_nextMove.acceleration: " + String(_nextMove.acceleration));
+        Serial.println("_nextMove.stroke: " + String(_nextMove.stroke));
+        Serial.println("_lastStroke: " + String(_lastStroke));
+#endif
+        return _nextMove;
+    }
+
+  protected:
+    float _timeOfStroke = 1.0;
+    int _lastStroke = 0;
+};

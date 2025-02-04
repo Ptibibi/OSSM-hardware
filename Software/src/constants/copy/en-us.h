@@ -40,7 +40,8 @@ static const LanguageStruct enUs = {
         "Full and half depth strokes alternate; sensation affects speed.",
         "Stroke depth increases per cycle; sensation sets count.",
         "Pauses between strokes; sensation adjusts length.",
-        "Modifies length, maintains speed; sensation influences direction."
+        "Modifies length, maintains speed; sensation influences direction.",
+        "TODO <Random description."
     },
     .StrokeEngineNames = {
         "Simple Penetration",
@@ -49,7 +50,8 @@ static const LanguageStruct enUs = {
         "Half'n'Half",
         "Deeper",
         "Stop'n'Go",
-        "Insist"
+        "Insist",
+        "Random"
     },
 };
 

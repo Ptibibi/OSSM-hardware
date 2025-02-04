@@ -45,6 +45,7 @@ static const LanguageStruct fr = {
         "La profondeur des coups augmente à chaque cycle ; la sensation définit le nombre.",
         "Pauses entre les coups ; la sensation ajuste la longueur.",
         "Modifie la longueur, maintient la vitesse ; la sensation influe sur la direction.",
+        "TODO <Random description."
     },
     .StrokeEngineNames = {
         "Simple Penetration",
@@ -54,6 +55,7 @@ static const LanguageStruct fr = {
         "Deeper",
         "Stop'n'Go",
         "Insist",
+        "Random"
     }
 };
 
