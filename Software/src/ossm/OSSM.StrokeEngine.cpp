@@ -24,9 +24,10 @@ void OSSM::startStrokeEngineTask(void *pvParameters) {
         // Add any states that you want to support here.
         return ossm->sm->is("strokeEngine"_s) ||
                ossm->sm->is("strokeEngine.idle"_s) ||
-               ossm->sm->is("strokeEngine.pattern"_s) ||
-               ossm->sm->is("strokeEngine.transition"_s);
+               ossm->sm->is("strokeEngine.pattern"_s);
     };
+
+    lastSetting.pattern = ossm->setting.pattern;
 
     while (isInCorrectState(ossm)) {
         if (!ossm->sm->is("strokeEngine.idle"_s)) {
