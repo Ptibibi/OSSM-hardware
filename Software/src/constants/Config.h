@@ -80,7 +80,7 @@ namespace Config {
         constexpr float minStrokeLengthMm = 50.0_mm;
 
         // Applied offset after homing process.
-        constexpr float homingOffsetMn = 10_mm;
+        constexpr float homingOffsetMn = 20_mm;
     }
 
     /**
@@ -132,29 +132,29 @@ namespace Config {
         // Speed lerp of speed for SinglePenetration and StrokeEngine mode
         // Time cycle is approximately 100-200ms in fact system load
         namespace SpeedLerp {
-            constexpr float UpPercentPerCycle = 100.0f;
+            constexpr float UpPercentPerCycle = 2.0f;
             constexpr float DownPercentPerCycle = 100.0f;
         }
 
         // Speed lerp of stroke for StrokeEngine mode
         // Time cycle is approximately 100-200ms in fact system load
         namespace StrokedLerp {
-            constexpr float UpPercentPerCycle = 100.0f;
-            constexpr float DownPercentPerCycle = 100.0f;
+            constexpr float UpPercentPerCycle = 5.0f;
+            constexpr float DownPercentPerCycle = 5.0f;
         }
 
         // Speed lerp of depth for StrokeEngine mode
         // Time cycle is approximately 100-200ms in fact system load
         namespace DepthLerp {
-            constexpr float UpPercentPerCycle = 100.0f;
-            constexpr float DownPercentPerCycle = 100.0f;
+            constexpr float UpPercentPerCycle = 5.0f;
+            constexpr float DownPercentPerCycle = 5.0f;
         }
 
         // Speed lerp of sensation for StrokeEngine mode
         // Time cycle is approximately 100-200ms in fact system load
         namespace SensationLerp {
-            constexpr float UpPercentPerCycle = 100.0f;
-            constexpr float DownPercentPerCycle = 100.0f;
+            constexpr float UpPercentPerCycle = 5.0f;
+            constexpr float DownPercentPerCycle = 5.0f;
         }
     }
 
