@@ -15,6 +15,9 @@ void OSSM::drawPreflightTask(void *pvParameters) {
     ossm->stepper->setSpeedInHz(25_mm);
     ossm->stepper->moveTo(0, false);
 
+    // Set speed consigne at 0
+    ossm->setting.speed = 0;
+
     /**
      * /////////////////////////////////////////////
      * //// Safely Block High Speeds on Startup ///
