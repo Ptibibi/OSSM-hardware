@@ -117,11 +117,11 @@ class StrokeEngine {
 
     /**************************************************************************/
     /*!
-      @brief  Set the speed of a stroke. Speed is given in Strokes per Minute
+      @brief  Set the speed of a stroke. Speed is given in mm per Second
       and internally calculated to the time a full stroke needs to complete.
       Settings tale effect with next stroke, or after calling
       applyNewSettingsNow().
-      @param speed Strokes per Minute. Is constrained from 0.5 to 6000
+      @param speed mm per second. Is constrained from 0.0 to Config::Driver::maxSpeedMmPerSecond
       @param applyNow Set to true if changes should take effect immediately
     */
     /**************************************************************************/
@@ -129,8 +129,8 @@ class StrokeEngine {
 
     /**************************************************************************/
     /*!
-      @brief  Get the speed of a stroke. Speed is returned as Strokes per
-      Minute.
+      @brief  Get the speed of a stroke. Speed is returned as mm per
+      Second.
       @return Strokes per Minute.
     */
     /**************************************************************************/
@@ -397,16 +397,18 @@ class StrokeEngine {
     float _travel;
     int _minStep;
     int _maxStep;
+    int _minStepPerSecond;
     int _maxStepPerSecond;
     int _maxStepAcceleration;
-    Pattern *pattern = new SimpleStroke("Simple Stroke");
+    Pattern *pattern = new SimplePenetration("Simple Penetration");
     bool _isHomed = false;
     int _index = 0;
+    int _speed;
     int _depth;
     int _previousDepth;
     int _stroke;
     int _previousStroke;
-    float _timeOfStroke;
+
     float _sensation;
     bool _applyUpdate = false;
     static void _homingProcedureImpl(void *_this) {

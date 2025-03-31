@@ -15,7 +15,6 @@ struct LanguageStruct {
     String NoInternalLoop;
     String Restart;
     String Settings;
-    String SimplePenetration;
     String Skip;
     String Speed;
     String SpeedWarning;

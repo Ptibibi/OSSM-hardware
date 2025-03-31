@@ -19,13 +19,12 @@ static const LanguageStruct enUs = {
     .NoInternalLoop = "No display handler implemented.",
     .Restart = "Restart",
     .Settings = "Settings",
-    .SimplePenetration = "Simple Penetration",
     .Skip = "Click to exit",
     .Speed = "Speed",
     .SpeedWarning = "Decrease the speed to begin playing.",
     .StateNotImplemented = "State: %u not implemented.",
     .Stroke = "Stroke",
-    .StrokeEngine = "Stroke Engine",
+    .StrokeEngine = "Play OSSM",
     .StrokeTooShort = "Stroke too short. Please check you drive belt.",
     .Update = "Update",
     .UpdateMessage = "Update is in progress. This may take up to 60s.",
@@ -35,7 +34,7 @@ static const LanguageStruct enUs = {
     .WiFiSetupLine2 = "'Ossm Setup'",
     .YouShouldNotBeHere = "You should not be here.",
     .StrokeEngineDescriptions = {
-        "Acceleration, coasting, deceleration equally split; no sensation.",
+        "Acceleration, coasting, deceleration equally split; on all depth.",
         "Speed shifts with sensation; balances faster strokes.",
         "Sensation varies acceleration; from robotic to gradual.",
         "Full and half depth strokes alternate; sensation affects speed.",
@@ -44,7 +43,7 @@ static const LanguageStruct enUs = {
         "Modifies length, maintains speed; sensation influences direction."
     },
     .StrokeEngineNames = {
-        "Simple Stroke",
+        "Simple Penetration",
         "Teasing Pounding",
         "Robo Stroke",
         "Half'n'Half",

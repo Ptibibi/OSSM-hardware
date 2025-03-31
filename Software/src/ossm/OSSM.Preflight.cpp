@@ -15,6 +15,9 @@ void OSSM::drawPreflightTask(void *pvParameters) {
     ossm->stepper->setSpeedInHz(25_mm);
     ossm->stepper->moveTo(0, false);
 
+    // Set speed consigne at 0
+    ossm->setting.speed = 0;
+
     /**
      * /////////////////////////////////////////////
      * //// Safely Block High Speeds on Startup ///
@@ -27,14 +30,15 @@ void OSSM::drawPreflightTask(void *pvParameters) {
 
     auto isInPreflight = [](OSSM *ossm) {
         // Add your preflight checks states here.
-        return ossm->sm->is("simplePenetration.preflight"_s) ||
-               ossm->sm->is("strokeEngine.preflight"_s);
+        return ossm->sm->is("strokeEngine.preflight"_s);
     };
 
     do {
         speedPercentage =
             getAnalogAveragePercent(SampleOnPin{Pins::Remote::speedPotPin, 50});
-        if (speedPercentage < Config::Advanced::commandDeadZonePercentage) {
+        // Waiting speed is at 0% and strepper is at the home position
+        if (speedPercentage < Config::Advanced::commandDeadZonePercentage &&
+            ossm->stepper->getCurrentPosition() == 0) {
             ossm->sm->process_event(Done{});
             break;
         };
